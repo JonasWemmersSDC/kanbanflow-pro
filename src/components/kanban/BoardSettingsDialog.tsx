@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,14 +22,13 @@ export default function BoardSettingsDialog({ board, open, onOpenChange, onDelet
   const updateBoard = useUpdateBoard();
   const deleteBoard = useDeleteBoard();
 
-  const handleOpen = (isOpen: boolean) => {
-    if (isOpen && board) {
+  useEffect(() => {
+    if (open && board) {
       setName(board.name);
       setDescription(board.description || '');
       setConfirmDelete(false);
     }
-    onOpenChange(isOpen);
-  };
+  }, [open, board]);
 
   const handleSave = async () => {
     if (!board) return;
@@ -59,7 +58,7 @@ export default function BoardSettingsDialog({ board, open, onOpenChange, onDelet
   };
 
   return (
-    <Dialog open={open && !!board} onOpenChange={handleOpen}>
+    <Dialog open={open && !!board} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Board settings</DialogTitle>
