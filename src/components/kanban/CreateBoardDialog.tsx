@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useCreateBoard } from '@/hooks/useBoard';
+import { useUserTeam } from '@/hooks/useTeam';
 import { toast } from 'sonner';
 
 interface CreateBoardDialogProps {
@@ -15,11 +16,12 @@ interface CreateBoardDialogProps {
 export default function CreateBoardDialog({ open, onOpenChange, onCreated }: CreateBoardDialogProps) {
   const [name, setName] = useState('');
   const createBoard = useCreateBoard();
+  const { data: team } = useUserTeam();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const board = await createBoard.mutateAsync({ name });
+      const board = await createBoard.mutateAsync({ name, team_id: team?.id });
       toast.success('Board created!');
       setName('');
       onOpenChange(false);
