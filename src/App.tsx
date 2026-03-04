@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./hooks/useAuth";
+import ProtectedRoute from "./components/ProtectedRoute";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import TeamSetup from "./pages/TeamSetup";
@@ -27,13 +28,13 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
-            <Route path="/team-setup" element={<TeamSetup />} />
-            <Route path="/boards" element={<Board />} />
-            <Route path="/backlog" element={<BacklogView />} />
-            <Route path="/sprints" element={<SprintsView />} />
-            <Route path="/sprints/:id" element={<SprintDetail />} />
-            <Route path="/epics" element={<EpicsView />} />
-            <Route path="/team" element={<TeamSettingsPage />} />
+            <Route path="/team-setup" element={<ProtectedRoute><TeamSetup /></ProtectedRoute>} />
+            <Route path="/boards" element={<ProtectedRoute><Board /></ProtectedRoute>} />
+            <Route path="/backlog" element={<ProtectedRoute><BacklogView /></ProtectedRoute>} />
+            <Route path="/sprints" element={<ProtectedRoute><SprintsView /></ProtectedRoute>} />
+            <Route path="/sprints/:id" element={<ProtectedRoute><SprintDetail /></ProtectedRoute>} />
+            <Route path="/epics" element={<ProtectedRoute><EpicsView /></ProtectedRoute>} />
+            <Route path="/team" element={<ProtectedRoute><TeamSettingsPage /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
