@@ -58,7 +58,7 @@ export default function BoardSettingsDialog({ board, open, onOpenChange, onDelet
   };
 
   return (
-    <Dialog open={open && !!board} onOpenChange={handleOpen}>
+    <Dialog open={open && !!board} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Board settings</DialogTitle>
