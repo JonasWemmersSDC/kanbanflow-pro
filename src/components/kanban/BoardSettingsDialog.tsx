@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -62,6 +62,7 @@ export default function BoardSettingsDialog({ board, open, onOpenChange, onDelet
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Board settings</DialogTitle>
+          <DialogDescription>Update board name, description, or delete this board.</DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
           <div className="space-y-2">

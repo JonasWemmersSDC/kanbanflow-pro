@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -95,7 +95,7 @@ export default function TaskDetailDialog({ task, open, onOpenChange, members, ep
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader><DialogTitle>Edit task</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>Edit task</DialogTitle><DialogDescription>View and edit task details.</DialogDescription></DialogHeader>
         <div className="grid grid-cols-1 md:grid-cols-[1fr_200px] gap-4">
           {/* Main content */}
           <div className="space-y-4">
