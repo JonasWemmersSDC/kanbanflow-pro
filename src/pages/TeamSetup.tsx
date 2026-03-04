@@ -1,19 +1,34 @@
 import { useState } from 'react';
-import { useCreateTeam, useJoinTeam } from '@/hooks/useTeam';
+import { useNavigate, Navigate } from 'react-router-dom';
+import { useCreateTeam, useJoinTeam, useUserTeam } from '@/hooks/useTeam';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
-import { Layers, Copy } from 'lucide-react';
+import { Layers, Copy, Loader2 } from 'lucide-react';
 
 export default function TeamSetup() {
+  const { data: existingTeam, isLoading: teamLoading } = useUserTeam();
+  const navigate = useNavigate();
   const [teamName, setTeamName] = useState('');
   const [joinCode, setJoinCode] = useState('');
   const [createdCode, setCreatedCode] = useState<string | null>(null);
   const createTeam = useCreateTeam();
   const joinTeam = useJoinTeam();
+
+  if (teamLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (existingTeam) {
+    return <Navigate to="/boards" replace />;
+  }
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,7 +82,7 @@ export default function TeamSetup() {
                   <Copy className="h-4 w-4" />
                 </Button>
               </div>
-              <Button className="w-full" onClick={() => window.location.reload()}>
+              <Button className="w-full" onClick={() => navigate('/boards')}>
                 Go to workspace
               </Button>
             </CardContent>

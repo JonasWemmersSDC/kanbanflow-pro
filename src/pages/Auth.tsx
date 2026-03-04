@@ -14,22 +14,28 @@ export default function Auth() {
   const [password, setPassword] = useState('');
   const [displayName, setDisplayName] = useState('');
   const [loading, setLoading] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [signUpSuccess, setSignUpSuccess] = useState(false);
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setFormError(null);
     try {
       if (isSignUp) {
         await signUp(email, password, displayName);
+        setSignUpSuccess(true);
         toast.success('Account created! Check your email to confirm.');
       } else {
         await signIn(email, password);
         navigate('/');
       }
     } catch (error: any) {
-      toast.error(error.message);
+      const msg = isSignUp ? `Sign up failed: ${error.message}` : error.message;
+      setFormError(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
@@ -89,7 +95,13 @@ export default function Auth() {
                   minLength={6}
                 />
               </div>
-              <Button type="submit" className="w-full" disabled={loading}>
+              {formError && (
+                <p className="text-sm text-destructive">{formError}</p>
+              )}
+              {signUpSuccess && (
+                <p className="text-sm text-primary">Check your email to confirm your account before signing in.</p>
+              )}
+              <Button type="submit" className="w-full" disabled={loading || signUpSuccess}>
                 {loading ? 'Loading...' : isSignUp ? 'Create account' : 'Sign in'}
               </Button>
             </form>

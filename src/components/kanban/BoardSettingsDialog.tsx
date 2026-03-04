@@ -24,12 +24,19 @@ export default function BoardSettingsDialog({ board, open, onOpenChange, onDelet
 
   const handleOpen = (isOpen: boolean) => {
     if (isOpen && board) {
-      setName(board.name);
+      setName(board.name || '');
       setDescription(board.description || '');
       setConfirmDelete(false);
     }
     onOpenChange(isOpen);
   };
+
+  // Also sync when board prop changes while dialog is already open
+  const currentBoardId = board?.id;
+  if (open && board && name === '' && board.name) {
+    setName(board.name);
+    setDescription(board.description || '');
+  }
 
   const handleSave = async () => {
     if (!board) return;
