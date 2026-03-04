@@ -143,6 +143,7 @@ export type Database = {
           created_at: string
           created_by: string
           description: string | null
+          due_date: string | null
           id: string
           labels: string[] | null
           position: number
@@ -157,6 +158,7 @@ export type Database = {
           created_at?: string
           created_by: string
           description?: string | null
+          due_date?: string | null
           id?: string
           labels?: string[] | null
           position?: number
@@ -171,6 +173,7 @@ export type Database = {
           created_at?: string
           created_by?: string
           description?: string | null
+          due_date?: string | null
           id?: string
           labels?: string[] | null
           position?: number
