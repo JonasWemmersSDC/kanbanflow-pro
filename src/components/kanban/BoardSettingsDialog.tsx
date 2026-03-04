@@ -31,9 +31,8 @@ export default function BoardSettingsDialog({ board, open, onOpenChange, onDelet
     onOpenChange(isOpen);
   };
 
-  if (!board) return null;
-
   const handleSave = async () => {
+    if (!board) return;
     try {
       await updateBoard.mutateAsync({ id: board.id, name, description });
       toast.success('Board updated');
@@ -44,6 +43,7 @@ export default function BoardSettingsDialog({ board, open, onOpenChange, onDelet
   };
 
   const handleDelete = async () => {
+    if (!board) return;
     if (!confirmDelete) {
       setConfirmDelete(true);
       return;
@@ -59,7 +59,7 @@ export default function BoardSettingsDialog({ board, open, onOpenChange, onDelet
   };
 
   return (
-    <Dialog open={open} onOpenChange={handleOpen}>
+    <Dialog open={open && !!board} onOpenChange={handleOpen}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Board settings</DialogTitle>

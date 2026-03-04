@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useEpics, useCreateEpic, useUpdateEpic, useDeleteEpic } from '@/hooks/useAgile';
 import { useUserTeam } from '@/hooks/useTeam';
 import { useAllTeamTasks } from '@/hooks/useAgile';
@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Progress } from '@/components/ui/progress';
 import { Plus, Trash2, Flag, Pencil } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 
@@ -59,14 +60,41 @@ export default function EpicsView() {
     }
   };
 
+  const [doneTaskIds, setDoneTaskIds] = useState<Set<string>>(new Set());
+
+  // Determine which tasks are in "done" columns
+  useEffect(() => {
+    const checkDone = async () => {
+      if (!allTasks.length) return;
+      const boardIds = [...new Set(allTasks.map((t) => t.board_id))];
+      const doneSet = new Set<string>();
+      for (const boardId of boardIds) {
+        const { data: cols } = await supabase
+          .from('columns')
+          .select('id, position')
+          .eq('board_id', boardId)
+          .order('position', { ascending: false })
+          .limit(1);
+        const doneColId = cols?.[0]?.id;
+        if (doneColId) {
+          allTasks
+            .filter((t) => t.board_id === boardId && t.column_id === doneColId)
+            .forEach((t) => doneSet.add(t.id));
+        }
+      }
+      setDoneTaskIds(doneSet);
+    };
+    checkDone();
+  }, [allTasks]);
+
   const getEpicProgress = (epicId: string) => {
     const epicTasks = allTasks.filter((t) => t.epic_id === epicId);
     if (!epicTasks.length) return { total: 0, done: 0, pct: 0, points: 0 };
-    // Consider tasks in last column as "done" - we approximate
     const total = epicTasks.length;
+    const done = epicTasks.filter((t) => doneTaskIds.has(t.id)).length;
     const points = epicTasks.reduce((s, t) => s + (t.story_points || 0), 0);
-    // This is an approximation - ideally we'd check column position
-    return { total, done: 0, pct: 0, points };
+    const pct = Math.round((done / total) * 100);
+    return { total, done, pct, points };
   };
 
   return (
