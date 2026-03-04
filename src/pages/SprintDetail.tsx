@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSprints, useBurndownData, useRecordBurndown, useAllTeamTasks } from '@/hooks/useAgile';
 import { useUserTeam } from '@/hooks/useTeam';
@@ -8,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
-import { useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function SprintDetail() {
   const { id } = useParams<{ id: string }>();
@@ -22,7 +23,36 @@ export default function SprintDetail() {
   const sprint = sprints.find((s) => s.id === id);
   const sprintTasks = allTasks.filter((t) => t.sprint_id === id);
   const totalPoints = sprintTasks.reduce((s, t) => s + (t.story_points || 0), 0);
-  const remainingPoints = totalPoints; // Approximation - ideally check done column
+  // Tasks in the last column of their board are considered "done"
+  const [doneTasks, setDoneTasks] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    const checkDone = async () => {
+      const boardIds = [...new Set(sprintTasks.map((t) => t.board_id))];
+      const doneSet = new Set<string>();
+      for (const boardId of boardIds) {
+        const { data: cols } = await supabase
+          .from('columns')
+          .select('id, position')
+          .eq('board_id', boardId)
+          .order('position', { ascending: false })
+          .limit(1);
+        const doneColId = cols?.[0]?.id;
+        if (doneColId) {
+          sprintTasks
+            .filter((t) => t.board_id === boardId && t.column_id === doneColId)
+            .forEach((t) => doneSet.add(t.id));
+        }
+      }
+      setDoneTasks(doneSet);
+    };
+    if (sprintTasks.length) checkDone();
+  }, [sprintTasks]);
+
+  const donePoints = sprintTasks
+    .filter((t) => doneTasks.has(t.id))
+    .reduce((s, t) => s + (t.story_points || 0), 0);
+  const remainingPoints = totalPoints - donePoints;
 
   // Auto-record today's burndown snapshot
   useEffect(() => {
