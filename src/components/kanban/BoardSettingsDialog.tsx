@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,21 +22,13 @@ export default function BoardSettingsDialog({ board, open, onOpenChange, onDelet
   const updateBoard = useUpdateBoard();
   const deleteBoard = useDeleteBoard();
 
-  const handleOpen = (isOpen: boolean) => {
-    if (isOpen && board) {
-      setName(board.name || '');
+  useEffect(() => {
+    if (open && board) {
+      setName(board.name);
       setDescription(board.description || '');
       setConfirmDelete(false);
     }
-    onOpenChange(isOpen);
-  };
-
-  // Also sync when board prop changes while dialog is already open
-  const currentBoardId = board?.id;
-  if (open && board && name === '' && board.name) {
-    setName(board.name);
-    setDescription(board.description || '');
-  }
+  }, [open, board]);
 
   const handleSave = async () => {
     if (!board) return;
