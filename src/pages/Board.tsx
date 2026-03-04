@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { DragDropContext, DropResult } from '@hello-pangea/dnd';
 import { useBoards, useBoardData, useReorderTasks, useBoardMembers, Task } from '@/hooks/useBoard';
 import { useUserTeam } from '@/hooks/useTeam';
@@ -30,11 +30,19 @@ export default function Board() {
   const [priorityFilter, setPriorityFilter] = useState('all');
   const [assigneeFilter, setAssigneeFilter] = useState('all');
 
+  // Auto-select first board when boards load
   const activeBoardId = currentBoardId || boards[0]?.id || null;
   const currentBoard = boards.find((b) => b.id === activeBoardId) || null;
   const { columns, tasks, isLoading } = useBoardData(activeBoardId ?? undefined);
   const { data: membersRaw } = useBoardMembers(activeBoardId ?? undefined);
   const reorderTasks = useReorderTasks();
+
+  // Sync currentBoardId when boards change (e.g. after creation or deletion)
+  useEffect(() => {
+    if (boards.length > 0 && currentBoardId && !boards.find((b) => b.id === currentBoardId)) {
+      setCurrentBoardId(boards[0]?.id || null);
+    }
+  }, [boards, currentBoardId]);
 
   const members = useMemo(() => membersRaw?.map((m) => ({ user_id: m.user_id, profile: m.profile })) ?? [], [membersRaw]);
   const memberProfiles = useMemo(() => { const map = new Map<string, string>(); members.forEach((m) => map.set(m.user_id, m.profile?.display_name || m.user_id.slice(0, 8))); return map; }, [members]);
@@ -71,12 +79,16 @@ export default function Board() {
       <div className="flex h-full flex-col">
         {/* Board header */}
         <div className="flex items-center gap-3 border-b px-4 py-2">
-          <Select value={activeBoardId || ''} onValueChange={setCurrentBoardId}>
-            <SelectTrigger className="h-8 w-48"><SelectValue placeholder="Select board" /></SelectTrigger>
-            <SelectContent>
-              {boards.map((b) => (<SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>))}
-            </SelectContent>
-          </Select>
+          {boards.length > 0 ? (
+            <Select value={activeBoardId || undefined} onValueChange={(v) => setCurrentBoardId(v)}>
+              <SelectTrigger className="h-8 w-48"><SelectValue placeholder="Select board" /></SelectTrigger>
+              <SelectContent>
+                {boards.map((b) => (<SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>))}
+              </SelectContent>
+            </Select>
+          ) : (
+            <span className="text-sm text-muted-foreground">No boards yet</span>
+          )}
           <Button variant="ghost" size="sm" className="gap-1 text-muted-foreground" onClick={() => setShowCreateBoard(true)}><Plus className="h-3.5 w-3.5" /> Board</Button>
           {currentBoard && <Button variant="ghost" size="icon" className="h-8 w-8 ml-auto" onClick={() => setShowBoardSettings(true)}><Settings className="h-4 w-4" /></Button>}
         </div>
@@ -84,8 +96,9 @@ export default function Board() {
         <FilterBar priorityFilter={priorityFilter} onPriorityChange={setPriorityFilter} assigneeFilter={assigneeFilter} onAssigneeChange={setAssigneeFilter} members={members} />
 
         {!activeBoardId ? (
-          <div className="flex flex-1 items-center justify-center text-muted-foreground text-sm">
+          <div className="flex flex-1 flex-col items-center justify-center gap-3 text-muted-foreground text-sm">
             <p>Create a board to get started</p>
+            <Button onClick={() => setShowCreateBoard(true)} className="gap-1.5"><Plus className="h-4 w-4" /> Create Board</Button>
           </div>
         ) : isLoading ? (
           <div className="flex flex-1 items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
